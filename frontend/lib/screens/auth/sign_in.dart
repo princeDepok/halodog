@@ -1,6 +1,10 @@
-// ignore_for_file: prefer_const_constructors
+// sign_in.dart
 
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/core/home.dart';
+import 'package:frontend/services/api_services.dart';
+import 'package:frontend/services/token_storage.dart';
+import 'package:frontend/screens/auth/sign_up.dart';
 import 'package:frontend/utils/button.dart';
 import 'package:frontend/utils/textfield.dart';
 
@@ -13,6 +17,56 @@ class _SignInState extends State<SignIn> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  Future<void> _signIn() async {
+    final apiService = ApiService();
+    final email = _emailController.text;
+    final password = _passwordController.text;
+
+    if (email.isNotEmpty && password.isNotEmpty) {
+      final loginData = {
+        'username': email,
+        'password': password,
+      };
+
+      final loginResponse = await apiService.loginUser(loginData);
+      if (loginResponse.statusCode == 200) {
+        final tokens = loginResponse.data;
+        final tokenStorage = TokenStorage();
+        await tokenStorage.saveTokens(tokens['access'], tokens['refresh']);
+
+        // Fetch user details and store user data
+        final userId = tokens['user_id'].toString();
+        await tokenStorage.saveUserId(userId);
+        final userDetailsResponse = await apiService.getUserDetails(int.parse(userId), tokens['access']);
+        if (userDetailsResponse.statusCode == 200) {
+          await tokenStorage.saveUserData(userDetailsResponse.data);
+          _navigateToHome();
+          print('Login and user data fetch successful');
+        } else {
+          print('Failed to fetch user details: ${userDetailsResponse.data}');
+        }
+      } else {
+        print('Login failed: ${loginResponse.data}');
+      }
+    } else {
+      print('Please fill in both fields');
+    }
+  }
+
+  void _navigateToSignUp() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SignUp()),
+    );
+  }
+
+  void _navigateToHome() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => Home()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,15 +75,6 @@ class _SignInState extends State<SignIn> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Align(
-              alignment: Alignment.topLeft,
-              child: IconButton(
-                icon: Icon(Icons.arrow_back),
-                onPressed: () {
-                  // Handle back button press
-                },
-              ),
-            ),
             Spacer(),
             Column(
               children: [
@@ -57,7 +102,7 @@ class _SignInState extends State<SignIn> {
                     controller: _passwordController,
                     hintText: "Password"),
                 SizedBox(height: 20),
-                CustomButton(text: "Sign In", onPressed: () {}),
+                CustomButton(text: "Sign In", onPressed: _signIn),
                 SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {},
@@ -86,35 +131,23 @@ class _SignInState extends State<SignIn> {
                   ],
                 ),
                 SizedBox(height: 20),
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                //   children: [
-                //     IconButton(
-                //       icon: Image.asset('assets/facebook_icon.png'),
-                //       iconSize: 50,
-                //       onPressed: () {
-                //         // Handle Facebook login
-                //       },
-                //     ),
-                //     IconButton(
-                //       icon: Image.asset('assets/google_icon.png'),
-                //       iconSize: 50,
-                //       onPressed: () {
-                //         // Handle Google login
-                //       },
-                //     ),
-                //     IconButton(
-                //       icon: Image.asset('assets/apple_icon.png'),
-                //       iconSize: 50,
-                //       onPressed: () {
-                //         // Handle Apple login
-                //       },
-                //     ),
-                //   ],
-                // ),
               ],
             ),
             Spacer(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Don't have an account? "),
+                GestureDetector(
+                  onTap: _navigateToSignUp,
+                  child: Text(
+                    "Sign Up",
+                    style: TextStyle(color: Colors.orange),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10,)
           ],
         ),
       ),

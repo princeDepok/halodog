@@ -1,9 +1,13 @@
-// ignore_for_file: prefer_const_constructors
+// home.dart
 
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/core/consult/select_package.dart';
+import 'package:frontend/screens/core/doctors/list_doctors.dart';
 import 'package:frontend/screens/core/shop/pet_shop.dart';
+import 'package:frontend/services/api_services.dart';
 import 'package:frontend/utils/article.dart';
+import 'package:frontend/services/token_storage.dart';
+import 'package:frontend/utils/custom_menubar.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -13,6 +17,35 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  String username = 'User'; // Default username
+  final TokenStorage _tokenStorage = TokenStorage();
+  final ApiService _apiService = ApiService();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData();
+  }
+
+  Future<void> _fetchUserData() async {
+    try {
+      final accessToken = await _tokenStorage.getAccessToken();
+      final userId = await _tokenStorage.getUserId();
+      if (accessToken != null && userId != null) {
+        final response = await _apiService.getUserDetails(int.parse(userId), accessToken);
+        if (response.statusCode == 200) {
+          setState(() {
+            username = response.data['username'] ?? 'User'; // Use 'User' if username is not available
+          });
+        } else {
+          print('Failed to fetch user details: ${response.data}');
+        }
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+    }
+  }
+
   void navigateToPage(BuildContext context, Widget page) {
     Navigator.push(
       context,
@@ -28,12 +61,12 @@ class _HomeState extends State<Home> {
         toolbarHeight: 10,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Hello, Arifin 👋',
+              'Hello, $username 👋',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -47,8 +80,7 @@ class _HomeState extends State<Home> {
                 decoration: InputDecoration(
                   hintText: 'Search',
                   hintStyle: TextStyle(
-                      color: Colors
-                          .white), // Mengatur warna teks hint menjadi putih
+                      color: Colors.white), // Mengatur warna teks hint menjadi putih
                   prefixIcon: Icon(Icons.search,
                       color: Colors.white), // Mengatur warna ikon menjadi putih
                   border: OutlineInputBorder(
@@ -60,8 +92,16 @@ class _HomeState extends State<Home> {
                       0xFFFF8C02), // Mengatur warna latar belakang menjadi #FF8C02
                 ),
                 style: TextStyle(
-                    color: Colors
-                        .white), // Mengatur warna teks input menjadi putih
+                    color: Colors.white), // Mengatur warna teks input menjadi putih
+              ),
+            ),
+            SizedBox(height: 35),
+            Container(
+              height: 153,
+              width: MediaQuery.of(context).size.width,
+              decoration: BoxDecoration(
+                color: Colors.blue, // Choose the desired background color
+                borderRadius: BorderRadius.circular(15),
               ),
             ),
             SizedBox(height: 35),
@@ -72,7 +112,7 @@ class _HomeState extends State<Home> {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        navigateToPage(context, SelectPackageScreen());
+                        navigateToPage(context, DoctorList());
                       },
                       child: Container(
                         width: 75,
@@ -88,8 +128,7 @@ class _HomeState extends State<Home> {
                     SizedBox(height: 8), // Memberi jarak antara ikon dan teks
                     Text('Consult',
                         style: TextStyle(
-                            color: Colors
-                                .black)), // Menambahkan teks di bawah ikon
+                            color: Colors.black)), // Menambahkan teks di bawah ikon
                   ],
                 ),
                 Column(
@@ -186,6 +225,7 @@ class _HomeState extends State<Home> {
           ],
         ),
       ),
+      bottomNavigationBar: CustomMenuBar(), // Add the custom menu bar here
     );
   }
 }

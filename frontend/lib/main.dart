@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/auth/sign_in.dart';
-import 'package:frontend/screens/auth/sign_up.dart';
-import 'package:frontend/screens/core/doctors/list_doctors.dart';
 import 'package:frontend/screens/core/home.dart';
+import 'package:frontend/screens/core/splash.dart';
+// import 'package:frontend/screens/auth/sign_up.dart';
+// import 'package:frontend/screens/core/doctors/list_doctors.dart';
+// import 'package:frontend/screens/core/home.dart';
 
 void main() {
   runApp(const MyApp());
