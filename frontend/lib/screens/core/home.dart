@@ -1,13 +1,11 @@
-// home.dart
-
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/core/consult/select_package.dart';
 import 'package:frontend/screens/core/doctors/list_doctors.dart';
-import 'package:frontend/screens/core/shop/pet_shop.dart';
 import 'package:frontend/services/api_services.dart';
 import 'package:frontend/utils/article.dart';
 import 'package:frontend/services/token_storage.dart';
 import 'package:frontend/utils/custom_menubar.dart';
+import 'package:frontend/screens/more_page.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -17,14 +15,65 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  String username = 'User'; // Default username
+  int _selectedIndex = 0;
+
+  final List<Widget> _pages = [
+    HomeScreen(),
+    // Add other screens here
+    Placeholder(),
+    Placeholder(),
+    MorePage(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages,
+      ),
+      bottomNavigationBar: CustomMenuBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+      ),
+    );
+  }
+}
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String username = 'Guest'; // Default to 'Guest'
   final TokenStorage _tokenStorage = TokenStorage();
   final ApiService _apiService = ApiService();
+  bool isGuest = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchUserData();
+    _checkUserStatus();
+  }
+
+  Future<void> _checkUserStatus() async {
+    isGuest = await _tokenStorage.isGuest();
+    if (!isGuest) {
+      _fetchUserData();
+    } else {
+      setState(() {
+        username = 'Guest';
+      });
+    }
   }
 
   Future<void> _fetchUserData() async {
@@ -55,177 +104,132 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        toolbarHeight: 10,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              'Hello, $username 👋',
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            'Hello, $username 👋',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 35),
+          Container(
+            width: 383,
+            height: 61,
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Search',
+                hintStyle: TextStyle(
+                    color: Colors.white), // Mengatur warna teks hint menjadi putih
+                prefixIcon: Icon(Icons.search,
+                    color: Colors.white), // Mengatur warna ikon menjadi putih
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide.none, // Menghapus border
+                ),
+                filled: true,
+                fillColor: Color(
+                    0xFFFF8C02), // Mengatur warna latar belakang menjadi #FF8C02
+              ),
               style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+                  color: Colors.white), // Mengatur warna teks input menjadi putih
             ),
-            SizedBox(height: 35),
-            Container(
-              width: 383,
-              height: 61,
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search',
-                  hintStyle: TextStyle(
-                      color: Colors.white), // Mengatur warna teks hint menjadi putih
-                  prefixIcon: Icon(Icons.search,
-                      color: Colors.white), // Mengatur warna ikon menjadi putih
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    borderSide: BorderSide.none, // Menghapus border
+          ),
+          SizedBox(height: 35),
+          Container(
+            height: 153,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Image.asset(
+              'assets/images/banner.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          SizedBox(height: 35),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      navigateToPage(context, DoctorList());
+                    },
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Color(0xFFFF8C02),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(Icons.medical_services,
+                          size: 48, color: Colors.white),
+                    ),
                   ),
-                  filled: true,
-                  fillColor: Color(
-                      0xFFFF8C02), // Mengatur warna latar belakang menjadi #FF8C02
-                ),
-                style: TextStyle(
-                    color: Colors.white), // Mengatur warna teks input menjadi putih
+                  SizedBox(height: 8),
+                  Text('Consult',
+                      style: TextStyle(color: Colors.black)),
+                ],
               ),
-            ),
-            SizedBox(height: 35),
-            Container(
-              height: 153,
-              width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                color: Colors.blue, // Choose the desired background color
-                borderRadius: BorderRadius.circular(15),
+              Column(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      if (isGuest) {
+                        Navigator.pushNamed(context, '/sign_in'); // Redirect to sign-in page if guest
+                      } else {
+                        // Add your BookingPage navigation here
+                      }
+                    },
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Color(0xFFFF8C02),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(Icons.book_online,
+                          size: 48, color: Colors.white),
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text('Booking', style: TextStyle(color: Colors.black)),
+                ],
               ),
-            ),
-            SizedBox(height: 35),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            ],
+          ),
+          SizedBox(height: 35),
+          Expanded(
+            child: ListView(
               children: <Widget>[
-                Column(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        navigateToPage(context, DoctorList());
-                      },
-                      child: Container(
-                        width: 75,
-                        height: 75,
-                        decoration: BoxDecoration(
-                          color: Color(0xFFFF8C02),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(Icons.medical_services,
-                            size: 36, color: Colors.white),
-                      ),
-                    ),
-                    SizedBox(height: 8), // Memberi jarak antara ikon dan teks
-                    Text('Consult',
-                        style: TextStyle(
-                            color: Colors.black)), // Menambahkan teks di bawah ikon
-                  ],
+                ArticleCard(
+                  imageUrl: 'assets/images/news1.png',
+                  title: 'COVID-19 Was a Top cause of Death in 2020 and 2021',
                 ),
-                Column(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        // navigateToPage(context, BookingPage());
-                      },
-                      child: Container(
-                        width: 75,
-                        height: 75,
-                        decoration: BoxDecoration(
-                          color: Color(0xFFFF8C02),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(Icons.book_online,
-                            size: 36, color: Colors.white),
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text('Booking', style: TextStyle(color: Colors.black)),
-                  ],
+                ArticleCard(
+                  imageUrl: 'assets/images/news1.png',
+                  title: 'Study finds being \'Hangry\' is a Real Thing',
                 ),
-                Column(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        navigateToPage(context, PetShopScreen());
-                      },
-                      child: Container(
-                        width: 75,
-                        height: 75,
-                        decoration: BoxDecoration(
-                          color: Color(0xFFFF8C02),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(Icons.pets, size: 36, color: Colors.white),
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text('Petshop', style: TextStyle(color: Colors.black)),
-                  ],
+                ArticleCard(
+                  imageUrl: 'assets/images/news1.png',
+                  title: 'COVID-19 Was a Top cause of Death in 2020 and 2021',
                 ),
-                Column(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        // navigateToPage(context, InpatientPage());
-                      },
-                      child: Container(
-                        width: 75,
-                        height: 75,
-                        decoration: BoxDecoration(
-                          color: Color(0xFFFF8C02),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(Icons.local_hospital,
-                            size: 36, color: Colors.white),
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text('Inpatient', style: TextStyle(color: Colors.black)),
-                  ],
+                ArticleCard(
+                  imageUrl: 'assets/images/news2.png',
+                  title: 'Study finds being \'Hangry\' is a Real Thing',
                 ),
               ],
             ),
-            SizedBox(height: 35),
-            Expanded(
-              child: ListView(
-                children: <Widget>[
-                  ArticleCard(
-                    imageUrl:
-                        'https://via.placeholder.com/150', // Replace with actual image URL
-                    title: 'COVID-19 Was a Top cause of Death in 2020 and 2021',
-                  ),
-                  ArticleCard(
-                    imageUrl:
-                        'https://via.placeholder.com/150', // Replace with actual image URL
-                    title: 'Study finds being \'Hangry\' is a Real Thing',
-                  ),
-                  ArticleCard(
-                    imageUrl:
-                        'https://via.placeholder.com/150', // Replace with actual image URL
-                    title: 'COVID-19 Was a Top cause of Death in 2020 and 2021',
-                  ),
-                  ArticleCard(
-                    imageUrl:
-                        'https://via.placeholder.com/150', // Replace with actual image URL
-                    title: 'Study finds being \'Hangry\' is a Real Thing',
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
-      bottomNavigationBar: CustomMenuBar(), // Add the custom menu bar here
     );
   }
 }

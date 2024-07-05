@@ -1,6 +1,7 @@
-// summary.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:frontend/services/token_storage.dart';
+import 'package:frontend/screens/auth/sign_in.dart';
 
 class ReviewSummaryPage extends StatelessWidget {
   final Map<String, dynamic> selectedDoctor;
@@ -147,8 +148,17 @@ class ReviewSummaryPage extends StatelessWidget {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                // Next action
+              onPressed: () async {
+                TokenStorage tokenStorage = TokenStorage();
+                bool isGuest = await tokenStorage.isGuest();
+                if (isGuest) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SignIn()),
+                  );
+                } else {
+                  // Proceed with booking action
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
@@ -157,7 +167,7 @@ class ReviewSummaryPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: Text('Next', style: TextStyle(fontSize: 18)),
+              child: Text('Book', style: TextStyle(fontSize: 18)),
             ),
           ],
         ),

@@ -1,20 +1,14 @@
-// custom_menubar.dart
-
 import 'package:flutter/material.dart';
 
-class CustomMenuBar extends StatefulWidget {
-  @override
-  _CustomMenuBarState createState() => _CustomMenuBarState();
-}
+class CustomMenuBar extends StatelessWidget {
+  final int currentIndex;
+  final Function(int) onTap;
 
-class _CustomMenuBarState extends State<CustomMenuBar> {
-  int _selectedIndex = 0;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+  const CustomMenuBar({
+    Key? key,
+    required this.currentIndex,
+    required this.onTap,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -50,12 +44,12 @@ class _CustomMenuBarState extends State<CustomMenuBar> {
 
   Widget _buildMenuItem(int index, String iconUnselected, String iconSelected) {
     return GestureDetector(
-      onTap: () => _onItemTapped(index),
+      onTap: () => onTap(index),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Image.asset(
-            _selectedIndex == index ? iconSelected : iconUnselected,
+            currentIndex == index ? iconSelected : iconUnselected,
             width: 30,
             height: 30,
           ),

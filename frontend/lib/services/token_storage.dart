@@ -1,3 +1,4 @@
+// token_storage.dart
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class TokenStorage {
@@ -49,5 +50,10 @@ class TokenStorage {
     for (var key in allValues.keys) {
       await _secureStorage.delete(key: key);
     }
+  }
+
+  Future<bool> isGuest() async {
+    final userId = await getUserId();
+    return userId == null;
   }
 }
