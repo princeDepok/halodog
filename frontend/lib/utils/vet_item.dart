@@ -101,7 +101,7 @@ class VetDoctorItem extends StatelessWidget {
                       ),
                       SizedBox(width: 4),
                       Text(
-                        '| ${doctor['reviews']} Reviews',
+                        '| Rp${doctor['range_fee']}',
                         style: TextStyle(
                           color: Colors.grey,
                           fontSize: 14,

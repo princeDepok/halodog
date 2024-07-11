@@ -1,34 +1,137 @@
-import 'package:flutter/material.dart';
+// vet_details.dart
 
-class VetDetails extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:frontend/screens/core/consult/summary.dart';
+
+class VetDetails extends StatefulWidget {
   final dynamic doctor;
 
   const VetDetails({Key? key, required this.doctor}) : super(key: key);
 
   @override
+  _VetDetailsState createState() => _VetDetailsState();
+}
+
+class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  String? _selectedChatTime;
+  String? _selectedCallTime;
+  String? _selectedPackage;
+  int _totalChatPrice = 0;
+  int _totalCallPrice = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(_setSelectedPackage);
+  }
+
+  @override
+  void dispose() {
+    _tabController.removeListener(_setSelectedPackage);
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _setSelectedPackage() {
+    setState(() {
+      if (_tabController.index == 0) {
+        _selectedPackage = 'Chat';
+      } else if (_tabController.index == 1) {
+        _selectedPackage = 'Video Call';
+      } else if (_tabController.index == 2) {
+        _selectedPackage = 'Clinic Appointment';
+      }
+    });
+  }
+
+  void _updateChatPrice() {
+    if (_selectedChatTime != null) {
+      double basePrice = double.tryParse(widget.doctor['chat_consultation_fee']) ?? 0.0;
+      switch (_selectedChatTime) {
+        case '15 minutes':
+          _totalChatPrice = basePrice.toInt();
+          break;
+        case '30 minutes':
+          _totalChatPrice = (basePrice * 2).toInt();
+          break;
+        case '60 minutes':
+          _totalChatPrice = (basePrice * 4).toInt();
+          break;
+      }
+    }
+  }
+
+  void _updateCallPrice() {
+    if (_selectedCallTime != null) {
+      double basePrice = double.tryParse(widget.doctor['voice_call_consultation_fee']) ?? 0.0;
+      switch (_selectedCallTime) {
+        case '30 minutes':
+          _totalCallPrice = basePrice.toInt();
+          break;
+        case '45 minutes':
+          _totalCallPrice = (basePrice / 30 * 45).toInt();
+          break;
+        case '60 minutes':
+          _totalCallPrice = (basePrice * 2).toInt();
+          break;
+      }
+    }
+  }
+
+  void _navigateToSummary() {
+    int totalPrice = 0;
+    if (_selectedPackage == 'Chat') {
+      totalPrice = _totalChatPrice;
+    } else if (_selectedPackage == 'Video Call') {
+      totalPrice = _totalCallPrice;
+    } else if (_selectedPackage == 'Clinic Appointment') {
+      totalPrice = int.parse(widget.doctor['appointment_fee']);
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ReviewSummaryPage(
+          selectedDoctor: widget.doctor,
+          selectedDuration: _selectedPackage == 'Chat' ? _selectedChatTime ?? '' : _selectedCallTime ?? '',
+          selectedPackage: _selectedPackage ?? '',
+          totalPrice: totalPrice,
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF4A90E2),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Color(0xFF4A90E2),
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        title: Text('Doctor\'s Info'),
         actions: [
           IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(Icons.favorite_border),
+            icon: Icon(Icons.more_vert, color: Colors.black),
             onPressed: () {},
           ),
         ],
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: Colors.black,
+          unselectedLabelColor: Colors.grey,
+          indicatorColor: Colors.black,
+          tabs: [
+            Tab(text: 'Chat'),
+            Tab(text: 'Video Call'),
+            Tab(text: 'Clinic Appointment'),
+          ],
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -36,7 +139,7 @@ class VetDetails extends StatelessWidget {
             Stack(
               children: [
                 Container(
-                  color: Color(0xFF4A90E2),
+                  color: Colors.white,
                   height: 200,
                   width: double.infinity,
                 ),
@@ -48,39 +151,33 @@ class VetDetails extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 50,
-                        backgroundImage: NetworkImage(doctor['picture']), // Doctor's image
+                        backgroundImage: NetworkImage(widget.doctor['picture']), // Doctor's image
                       ),
                       SizedBox(height: 10),
                       Text(
-                        doctor['name'],
+                        widget.doctor['name'],
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                       ),
                       SizedBox(height: 5),
                       Text(
-                        '${doctor['specialty']} | ${doctor['hospital']}',
+                        widget.doctor['clinic_name'],
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.white70,
+                          color: Colors.black54,
                         ),
                       ),
                       SizedBox(height: 5),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.access_time, color: Colors.white70, size: 16),
-                          SizedBox(width: 5),
-                          Text(
-                            doctor['workingHours'],
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        widget.doctor['clinic_address'],
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.black54,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ],
                   ),
@@ -94,91 +191,81 @@ class VetDetails extends StatelessWidget {
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: Offset(0, -2), // changes position of shadow
+                  ),
+                ],
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        Icon(Icons.star, color: Colors.amber, size: 20),
+                        SizedBox(width: 4),
                         Text(
-                          '${doctor['experience']}yr',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '${doctor['treated']}+',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '\$${doctor['hourlyRate']}',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Experience',
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
-                        ),
-                        Text(
-                          'Treated',
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
-                        ),
-                        Text(
-                          'Hourly Rate',
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                          '${widget.doctor['rating']}',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
                     SizedBox(height: 20),
                     Text(
-                      'Select Date',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      'Description',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildDropdown('Day'),
-                        _buildDropdown('Month'),
-                      ],
+                    Text(
+                      widget.doctor['description'],
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
                     ),
                     SizedBox(height: 20),
                     Text(
-                      'Schedules',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 10),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: [
-                        _buildScheduleItem('10:30am - 11:30am'),
-                        _buildScheduleItem('11:30am - 12:30pm'),
-                        _buildScheduleItem('12:30am - 1:30pm'),
-                        _buildScheduleItem('2:30am - 3:30pm'),
-                        _buildScheduleItem('3:30am - 4:30pm'),
-                        _buildScheduleItem('4:30am - 5:30pm'),
-                      ],
+                      'Experience: ${widget.doctor['experience_years']} years',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black54,
+                      ),
                     ),
                     SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF4A90E2),
-                        padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                      child: Text(
-                        'Book Appointment',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    Text(
+                      'Specialities',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
+                    SizedBox(height: 10),
+                    _buildSpecialities(widget.doctor['specialties']),
+                    SizedBox(height: 20),
+                    Container(
+                      height: 300, // Adjusted height to accommodate fee information
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          _buildChatTab(),
+                          _buildVideoCallTab(),
+                          _buildClinicAppointmentTab(),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    _buildSelectPackageButton(context),
                   ],
                 ),
               ),
@@ -189,39 +276,260 @@ class VetDetails extends StatelessWidget {
     );
   }
 
-  Widget _buildDropdown(String hint) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-        decoration: BoxDecoration(
-          color: Colors.grey[200],
-          borderRadius: BorderRadius.circular(10),
+  Widget _buildSpecialities(dynamic specialties) {
+    if (specialties is List && specialties.isNotEmpty && specialties[0] is Map) {
+      return Wrap(
+        spacing: 10,
+        runSpacing: 10,
+        children: specialties.map<Widget>((specialty) {
+          return Chip(
+            label: Text(specialty['name']),
+          );
+        }).toList(),
+      );
+    } else {
+      return Text(
+        'No specialities available',
+        style: TextStyle(
+          color: Colors.grey,
+          fontSize: 14,
         ),
-        child: DropdownButton<String>(
-          isExpanded: true,
-          underline: SizedBox(),
-          hint: Text(hint),
-          items: <String>['Option 1', 'Option 2', 'Option 3'].map((String value) {
+      );
+    }
+  }
+
+  Widget _buildSelectPackageButton(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: ElevatedButton(
+            onPressed: _navigateToSummary,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF7B61FF),
+              padding: EdgeInsets.symmetric(vertical: 15),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Text(
+              'Confirm Package',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChatTab() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Select Time Package',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 10),
+        DropdownButton<String>(
+          value: _selectedChatTime,
+          items: ['15 minutes', '30 minutes', '60 minutes']
+              .map<DropdownMenuItem<String>>((String value) {
             return DropdownMenuItem<String>(
               value: value,
               child: Text(value),
             );
           }).toList(),
-          onChanged: (newValue) {},
+          onChanged: (String? newValue) {
+            setState(() {
+              _selectedChatTime = newValue;
+              _updateChatPrice();
+            });
+          },
+          hint: Text('Select Time'),
         ),
+        SizedBox(height: 20),
+        Text(
+          'Consultation Fee: Rp${widget.doctor['chat_consultation_fee']}',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.black54,
+          ),
+        ),
+        SizedBox(height: 10),
+        Text(
+          'Total Price: Rp$_totalChatPrice',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVideoCallTab() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Select Time Package',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 10),
+        DropdownButton<String>(
+          value: _selectedCallTime,
+          items: ['30 minutes', '45 minutes', '60 minutes']
+              .map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+          onChanged: (String? newValue) {
+            setState(() {
+              _selectedCallTime = newValue;
+              _updateCallPrice();
+            });
+          },
+          hint: Text('Select Time'),
+        ),
+        SizedBox(height: 20),
+        Text(
+          'Consultation Fee: Rp${widget.doctor['voice_call_consultation_fee']}',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.black54,
+          ),
+        ),
+        SizedBox(height: 10),
+        Text(
+          'Total Price: Rp$_totalCallPrice',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildClinicAppointmentTab() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Select Date',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildDateItem('19', 'Sat', false),
+            _buildDateItem('20', 'Sun', true),
+            _buildDateItem('21', 'Mon', false),
+            _buildDateItem('22', 'Tue', false),
+            _buildDateItem('23', 'Wed', false),
+          ],
+        ),
+        SizedBox(height: 20),
+        Text(
+          'Select Time',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            _buildTimeItem('08:00 AM'),
+            _buildTimeItem('09:00 AM'),
+            _buildTimeItem('10:00 AM'),
+            _buildTimeItem('11:00 AM'),
+          ],
+        ),
+        SizedBox(height: 20),
+        Text(
+          'Consultation Fee: Rp${widget.doctor['appointment_fee']}',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.black54,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateItem(String date, String day, bool isSelected) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      decoration: BoxDecoration(
+        color: isSelected ? Color(0xFF7B61FF) : Colors.grey[200],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        children: [
+          Text(
+            date,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: isSelected ? Colors.white : Colors.black,
+            ),
+          ),
+          Text(
+            day,
+            style: TextStyle(
+              fontSize: 14,
+              color: isSelected ? Colors.white : Colors.black,
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildScheduleItem(String time) {
+  Widget _buildTimeItem(String time) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
         time,
+        style: TextStyle(color: Colors.black),
+      ),
+    );
+  }
+
+  Widget _buildTimePackageItem(String package) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        package,
         style: TextStyle(color: Colors.black),
       ),
     );

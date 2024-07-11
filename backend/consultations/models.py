@@ -17,7 +17,10 @@ class VetDoctor(models.Model):
     contact_number = models.CharField(max_length=20)
     email = models.EmailField(blank=True, null=True)
     availability = models.CharField(max_length=255, blank=True, null=True)  # Example: "Mon-Fri, 9AM-5PM"
-    consultation_fee = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
+    range_fee = models.CharField(max_length=50, blank=True, null=True)  # Example: "50-100"
+    chat_consultation_fee = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True)
+    voice_call_consultation_fee = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True)
+    appointment_fee = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True)
     experience_years = models.IntegerField(blank=True, null=True)
 
     def __str__(self):

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/auth/sign_in.dart';
 import 'package:frontend/screens/core/home.dart';
 import 'package:frontend/screens/core/splash.dart';
 import 'package:frontend/screens/more_page.dart';

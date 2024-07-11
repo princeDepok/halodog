@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model, authenticate
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils.translation import gettext_lazy as _
+from .models import Pet
 
 User = get_user_model()
 
@@ -67,3 +68,8 @@ class SetNewPasswordSerializer(serializers.Serializer):
 
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField()
+
+class PetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pet
+        fields = ['id', 'name', 'species', 'breed', 'age', 'description', 'photo', 'owner']

@@ -1,7 +1,6 @@
 # users/views.py
 import logging
 from django.contrib.auth import get_user_model
-from django.core.cache import cache
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -9,13 +8,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import (
     LogoutSerializer, SetNewPasswordSerializer, UserDetailSerializer, 
     UserListSerializer, UserSerializer, LoginSerializer, 
-    ResetPasswordSerializer, ValidateOTPSerializer
+    ResetPasswordSerializer, ValidateOTPSerializer, PetSerializer
 )
 from .tokens import generate_otp, get_otp
 from .tasks import send_otp_via_email
 from rest_framework.views import APIView
-
-import logging
+from .models import Pet
 
 logger = logging.getLogger(__name__)
 
@@ -68,8 +66,6 @@ class ResetPasswordView(generics.GenericAPIView):
         otp = generate_otp(email)
         send_otp_via_email(email, otp)
         return Response({"message": "OTP sent to email"}, status=status.HTTP_200_OK)
-
-logger = logging.getLogger(__name__)
 
 class ValidateOTPView(generics.GenericAPIView):
     serializer_class = ValidateOTPSerializer
@@ -127,3 +123,17 @@ class RefreshTokenView(APIView):
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         }
+
+class PetListView(generics.ListCreateAPIView):
+    queryset = Pet.objects.all()
+    serializer_class = PetSerializer
+    # permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+class PetDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Pet.objects.all()
+    serializer_class = PetSerializer
+    # permission_classes = [IsAuthenticated]
+    # lookup_field = 'pk'

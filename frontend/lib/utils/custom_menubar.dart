@@ -35,7 +35,6 @@ class CustomMenuBar extends StatelessWidget {
         children: <Widget>[
           _buildMenuItem(0, 'assets/icons/home-1.png', 'assets/icons/home-2.png'),
           _buildMenuItem(1, 'assets/icons/calendar-1.png', 'assets/icons/calendar-2.png'),
-          _buildMenuItem(2, 'assets/icons/chat-1.png', 'assets/icons/chat-2.png'),
           _buildMenuItem(3, 'assets/icons/profile-1.png', 'assets/icons/profile-2.png'),
         ],
       ),

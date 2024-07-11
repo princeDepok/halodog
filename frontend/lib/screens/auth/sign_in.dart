@@ -63,7 +63,7 @@ class _SignInState extends State<SignIn> {
   void _navigateToHome() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => HomeScreen()),
+      MaterialPageRoute(builder: (context) => Home()),
     );
   }
 

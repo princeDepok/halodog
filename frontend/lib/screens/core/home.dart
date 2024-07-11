@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/core/doctors/list_vet.dart';
+import 'package:frontend/screens/core/doctors/vet_details.dart';
 import 'package:frontend/services/api_services.dart';
 import 'package:frontend/services/token_storage.dart';
 import 'package:frontend/utils/custom_menubar.dart';
@@ -81,7 +82,8 @@ class _HomeScreenState extends State<HomeScreen> {
       final accessToken = await _tokenStorage.getAccessToken();
       final userId = await _tokenStorage.getUserId();
       if (accessToken != null && userId != null) {
-        final response = await _apiService.getUserDetails(int.parse(userId), accessToken);
+        final response =
+            await _apiService.getUserDetails(int.parse(userId), accessToken);
         if (response.statusCode == 200) {
           setState(() {
             username = response.data['username'] ?? 'User';
@@ -113,6 +115,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void navigateToDoctorDetails(BuildContext context, dynamic doctor) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => VetDetails(doctor: doctor)),
+    );
+  }
+
   void navigateToDoctorList(BuildContext context, String specialty) {
     Navigator.push(
       context,
@@ -120,7 +129,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildConsultationItem(BuildContext context, String label, IconData icon, Color color) {
+  Widget _buildConsultationItem(
+      BuildContext context, String label, IconData icon, Color color) {
     return GestureDetector(
       onTap: () {
         navigateToDoctorList(context, label);
@@ -146,9 +156,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Home'),
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -216,72 +223,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 SizedBox(
                   height: 15,
                 ),
-                Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Color(0xffF4A261),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: const [
-                          CircleAvatar(
-                            radius: 28,
-                          ),
-                          SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Dr. Imran Syahir',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  'General Doctor',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.white70,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(Icons.arrow_forward_ios, color: Colors.white70),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.calendar_today, color: Colors.white70, size: 16),
-                          SizedBox(width: 4),
-                          Text(
-                            'Sunday, 12 June',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 13,
-                            ),
-                          ),
-                          SizedBox(width: 50),
-                          Icon(Icons.access_time, color: Colors.white70, size: 16),
-                          SizedBox(width: 4),
-                          Text(
-                            '11:00 - 12:00 AM',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                Text(
+                  "You don't have any appointment",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black87,
                   ),
                 ),
                 const SizedBox(height: 15),
@@ -301,12 +248,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
                   children: [
-                    _buildConsultationItem(context, 'Dog', Icons.pets, Colors.blue),
-                    _buildConsultationItem(context, 'Cat', Icons.pets, Colors.blue),
-                    _buildConsultationItem(context, 'Bird', Icons.pets, Colors.blue),
-                    _buildConsultationItem(context, 'Hamster', Icons.pets, Colors.blue),
-                    _buildConsultationItem(context, 'Rabbit', Icons.pets, Colors.blue),
-                    _buildConsultationItem(context, 'All', Icons.more_horiz, Colors.blue),
+                    _buildConsultationItem(
+                        context, 'Dog', Icons.pets, Color(0xffF4A261)),
+                    _buildConsultationItem(
+                        context, 'Cat', Icons.pets, Color(0xffF4A261)),
+                    _buildConsultationItem(
+                        context, 'Bird', Icons.pets, Color(0xffF4A261)),
+                    _buildConsultationItem(
+                        context, 'Hamster', Icons.pets, Color(0xffF4A261)),
+                    _buildConsultationItem(
+                        context, 'Rabbit', Icons.pets, Color(0xffF4A261)),
+                    _buildConsultationItem(
+                        context, 'All', Icons.more_horiz, Color(0xffF4A261)),
                   ],
                 ),
                 const SizedBox(height: 35),
@@ -325,11 +278,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: vetDoctors.length,
                   itemBuilder: (context, index) {
                     final doctor = vetDoctors[index];
-                    return Column(
-                      children: [
-                        VetDoctorItem(doctor: doctor),
-                        SizedBox(height: 10), // Add spacing between items
-                      ],
+                    return GestureDetector(
+                      onTap: () => navigateToDoctorDetails(context, doctor),
+                      child: Column(
+                        children: [
+                          VetDoctorItem(doctor: doctor),
+                          SizedBox(height: 10), // Add spacing between items
+                        ],
+                      ),
                     );
                   },
                 ),

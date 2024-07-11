@@ -17,19 +17,20 @@ class DoctorCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = VetDoctor
         fields = [
-            'id', 'picture', 'name', 'rating', 'description', 
-            'clinic_name', 'clinic_address', 'contact_number', 
-            'email', 'availability', 'consultation_fee', 'experience_years', 'specialties'
+          'id', 'name', 'rating', 'specialties', 'description', 'picture', 
+            'clinic_name', 'clinic_address', 'contact_number', 'email', 
+            'availability', 'range_fee', 'chat_consultation_fee', 
+            'voice_call_consultation_fee', 'appointment_fee', 'experience_years'
         ]
 
 class DoctorSerializer(serializers.ModelSerializer):
     specialties = SpecialitySerializer(many=True, read_only=True)
-    consultation_fee = serializers.DecimalField(max_digits=6, decimal_places=2)
 
     class Meta:
         model = VetDoctor
         fields = [
-            'id', 'picture', 'name', 'rating', 'description', 
-            'clinic_name', 'clinic_address', 'contact_number', 
-            'email', 'availability', 'consultation_fee', 'experience_years', 'specialties'
+           'id', 'name', 'rating', 'specialties', 'description', 'picture', 
+            'clinic_name', 'clinic_address', 'contact_number', 'email', 
+            'availability', 'range_fee', 'chat_consultation_fee', 
+            'voice_call_consultation_fee', 'appointment_fee', 'experience_years'
         ]

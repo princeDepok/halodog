@@ -38,7 +38,7 @@ class _ProfilePageState extends State<ProfilePage> {
     await tokenStorage.deleteUserData();
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => HomeScreen()),
+      MaterialPageRoute(builder: (context) => Home()),
     );
   }
 
@@ -48,60 +48,69 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         title: Text('Profile'),
       ),
-      body: Center(
-        child: _isGuest
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SignIn()),
-                      );
-                    },
-                    child: Text('Sign In'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => SignUp()),
-                      );
-                    },
-                    child: Text('Sign Up'),
-                  ),
-                ],
-              )
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (_userData != null)
-                    ...[
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundImage: AssetImage('assets/images/profile_placeholder.png'), // Ganti dengan path gambar profil Anda
-                      ),
-                      SizedBox(height: 20),
-                      Text(
-                        'Username: ${_userData?['username']}',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      Text(
-                        'Email: ${_userData?['email']}',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    ],
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () => _signOut(context),
-                    child: Text('Sign Out'),
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white, backgroundColor: Colors.red,
+      body: Container(
+        color: Color(0xFFF5F5F5), // Background color similar to the picture
+        child: Center(
+          child: _isGuest
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SignIn()),
+                        );
+                      },
+                      child: Text('Sign In'),
                     ),
-                  ),
-                ],
-              ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SignUp()),
+                        );
+                      },
+                      child: Text('Sign Up'),
+                    ),
+                  ],
+                )
+              : ListView(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.all(20.0),
+                  children: [
+                    SizedBox(height: 20),
+                    Center(
+                      child: CircleAvatar(
+                        radius: 70,
+                        backgroundImage: AssetImage('assets/images/profile_placeholder.png'), // Placeholder image
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      'Username: ${_userData?['username'] ?? 'N/A'}',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'Email: ${_userData?['email'] ?? 'N/A'}',
+                      style: TextStyle(fontSize: 18),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () => _signOut(context),
+                      child: Text('Sign Out'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                      ),
+                    ),
+                  ],
+                ),
+        ),
       ),
     );
   }

@@ -1,3 +1,5 @@
+// summary.dart
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/services/token_storage.dart';
@@ -7,12 +9,14 @@ class ReviewSummaryPage extends StatelessWidget {
   final Map<String, dynamic> selectedDoctor;
   final String selectedDuration;
   final String selectedPackage;
+  final int totalPrice;
 
   const ReviewSummaryPage({
     Key? key,
     required this.selectedDoctor,
     required this.selectedDuration,
     required this.selectedPackage,
+    required this.totalPrice,
   }) : super(key: key);
 
   @override
@@ -67,10 +71,11 @@ class ReviewSummaryPage extends StatelessWidget {
                     selectedDoctor['name'],
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
-                  Text(
-                    selectedDoctor['specialty'],
-                    style: TextStyle(color: Colors.grey),
-                  ),
+                  // Uncomment this if specialty is available and needed
+                  // Text(
+                  //   selectedDoctor['specialty'],
+                  //   style: TextStyle(color: Colors.grey),
+                  // ),
                 ],
               ),
             ),
@@ -96,11 +101,7 @@ class ReviewSummaryPage extends StatelessWidget {
                   Divider(),
                   InfoRow(label: 'Duration', value: selectedDuration),
                   Divider(),
-                  InfoRow(label: 'Amount', value: '450.000'),
-                  Divider(),
-                  InfoRow(label: 'Duration (30 mins)', value: '1 x 450.000'),
-                  Divider(),
-                  InfoRow(label: 'Total', value: '450.000'),
+                  InfoRow(label: 'Total Price', value: 'Rp$totalPrice'),
                 ],
               ),
             ),

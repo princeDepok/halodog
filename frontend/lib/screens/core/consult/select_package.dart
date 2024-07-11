@@ -36,16 +36,16 @@ class _SelectPackageScreenState extends State<SelectPackageScreen> {
       return;
     }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ReviewSummaryPage(
-          selectedDoctor: widget.selectedDoctor,
-          selectedDuration: _selectedDuration,
-          selectedPackage: _selectedPackage,
-        ),
-      ),
-    );
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => ReviewSummaryPage(
+    //       selectedDoctor: widget.selectedDoctor,
+    //       selectedDuration: _selectedDuration,
+    //       selectedPackage: _selectedPackage,
+    //     ),
+    //   ),
+    // );
   }
 
   @override
