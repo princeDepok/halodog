@@ -63,7 +63,7 @@ class _SignInState extends State<SignIn> {
   void _navigateToHome() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => Home()),
+      MaterialPageRoute(builder: (context) => HomeScreen()),
     );
   }
 
@@ -102,7 +102,7 @@ class _SignInState extends State<SignIn> {
                     controller: _passwordController,
                     hintText: "Password"),
                 SizedBox(height: 20),
-                CustomButton(text: "Sign In", onPressed: _signIn),
+                CustomButton(text: "Sign In", onPressed: _signIn, ),
                 SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {},

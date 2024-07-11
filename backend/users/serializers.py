@@ -15,9 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'id', 'username', 'email', 'password', 'first_name', 'last_name', 
-            'phone_number',
-            'address', 'province', 'city', 'district', 'village'
+            'id', 'username', 'email', 'password'
         )
         extra_kwargs = {'password': {'write_only': True}}
 
@@ -26,14 +24,6 @@ class UserSerializer(serializers.ModelSerializer):
             username=validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name'],
-            phone_number=validated_data['phone_number'],
-            address=validated_data.get('address', ''),
-            province=validated_data.get('province', ''),
-            city=validated_data.get('city', ''),
-            district=validated_data.get('district', ''),
-            village=validated_data.get('village', '')
         )
         return user
 
@@ -41,9 +31,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id', 'username', 'email', 'first_name', 'last_name', 
-            'phone_number',
-            'address', 'province', 'city', 'district', 'village'
+            'id', 'username', 'email'
         ]
 
 class LoginSerializer(serializers.Serializer):

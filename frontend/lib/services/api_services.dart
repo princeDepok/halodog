@@ -1,12 +1,10 @@
-// api_services.dart
-
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'token_storage.dart';
 
 class ApiService {
   late final Dio _dio;
-  final String _baseUrl = 'http://10.10.168.154:8000/api/';
+  final String _baseUrl = 'http://192.168.0.5:8000/api/';
   final TokenStorage tokenStorage = TokenStorage();
 
   ApiService() {
@@ -40,39 +38,9 @@ class ApiService {
     }
   }
 
-  Future<bool> registerAndLoginUser(
-      Map<String, dynamic> registrationData) async {
-    try {
-      final registerResponse = await registerUser(registrationData);
-      if (registerResponse.statusCode == 200 ||
-          registerResponse.statusCode == 201) {
-        final loginData = {
-          'username': registrationData['email'],
-          'password': registrationData['password'],
-        };
-        final loginResponse = await loginUser(loginData);
-        if (loginResponse.statusCode == 200) {
-          final tokens = loginResponse.data;
-          await tokenStorage.saveTokens(tokens['access'], tokens['refresh']);
-          return true;
-        } else {
-          print('Login failed after registration: ${loginResponse.data}');
-          return false;
-        }
-      } else {
-        print('Registration failed: ${registerResponse.data}');
-        return false;
-      }
-    } catch (e) {
-      print('Error: $e');
-      return false;
-    }
-  }
-
   Future<Response> getUserDetails(int userId, String accessToken) async {
     try {
-      print(
-          'Requesting user details for userId: $userId with token: $accessToken');
+      print('Requesting user details for userId: $userId with token: $accessToken');
       final response = await _dio.get(
         'users/user/$userId/',
         options: Options(
@@ -100,7 +68,12 @@ class ApiService {
   Future<List<dynamic>> getDoctors() async {
     try {
       final response = await _dio.get('consultations/doctors/');
-      return response.data;
+      return (response.data as List).map((doctor) {
+        return {
+          ...doctor as Map<String, dynamic>,
+          'specialties': (doctor['specialties'] as List).map((s) => s['name']).toList(),
+        };
+      }).toList();
     } catch (e) {
       print('Error fetching doctors: $e');
       return [];

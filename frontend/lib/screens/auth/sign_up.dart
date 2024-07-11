@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/auth/sign_in.dart';
@@ -16,17 +14,9 @@ class _SignUpState extends State<SignUp> {
   bool _termsAccepted = false;
   bool _isLoading = false;
   final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
-  final TextEditingController _phoneNumberController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _provinceController = TextEditingController();
-  final TextEditingController _cityController = TextEditingController();
-  final TextEditingController _districtController = TextEditingController();
-  final TextEditingController _villageController = TextEditingController();
 
   final ApiService _apiService = ApiService(); // Create instance of ApiService
 
@@ -56,29 +46,21 @@ class _SignUpState extends State<SignUp> {
       'username': _usernameController.text,
       'email': _emailController.text,
       'password': _passwordController.text,
-      'first_name': _firstNameController.text,
-      'last_name': _lastNameController.text,
-      'phone_number': _phoneNumberController.text,
-      'address': _addressController.text,
-      'province': _provinceController.text,
-      'city': _cityController.text,
-      'district': _districtController.text,
-      'village': _villageController.text,
     };
 
-    final success = await _apiService.registerAndLoginUser(registrationData);
+    final response = await _apiService.registerUser(registrationData);
 
     setState(() {
       _isLoading = false;
     });
 
-    if (success) {
+     if (response.statusCode == 200 || response.statusCode == 201) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => SignIn()),
       );
     } else {
-      _showErrorDialog('Registration failed');
+      _showErrorDialog('Registration failed: ${response.data}');
     }
   }
 
@@ -138,26 +120,6 @@ class _SignUpState extends State<SignUp> {
                   hintText: 'Username',
                 ),
                 SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextField(
-                        icon: Icons.person,
-                        controller: _firstNameController,
-                        hintText: 'First Name',
-                      ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: CustomTextField(
-                        icon: Icons.person,
-                        controller: _lastNameController,
-                        hintText: 'Last Name',
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16),
                 CustomTextField(
                   icon: Icons.email,
                   controller: _emailController,
@@ -176,58 +138,6 @@ class _SignUpState extends State<SignUp> {
                   controller: _confirmPasswordController,
                   hintText: 'Confirm Password',
                   obscureText: true,
-                ),
-                SizedBox(height: 16),
-                CustomTextField(
-                  icon: Icons.phone,
-                  controller: _phoneNumberController,
-                  hintText: 'Phone Number',
-                ),
-                SizedBox(height: 16),
-                CustomTextField(
-                  icon: Icons.home,
-                  controller: _addressController,
-                  hintText: 'Address',
-                ),
-                SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextField(
-                        icon: Icons.map,
-                        controller: _provinceController,
-                        hintText: 'Province',
-                      ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: CustomTextField(
-                        icon: Icons.location_city,
-                        controller: _cityController,
-                        hintText: 'City',
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextField(
-                        icon: Icons.location_on,
-                        controller: _districtController,
-                        hintText: 'District',
-                      ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: CustomTextField(
-                        icon: Icons.location_city,
-                        controller: _villageController,
-                        hintText: 'Village',
-                      ),
-                    ),
-                  ],
                 ),
                 SizedBox(height: 16),
                 Row(

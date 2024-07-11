@@ -14,12 +14,12 @@ class CustomMenuBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width,
-      height: 80,
+      height: 70,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(40),
-          topRight: Radius.circular(40),
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
         ),
         boxShadow: [
           BoxShadow(
@@ -34,9 +34,9 @@ class CustomMenuBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           _buildMenuItem(0, 'assets/icons/home-1.png', 'assets/icons/home-2.png'),
-          _buildMenuItem(1, 'assets/icons/history-1.png', 'assets/icons/history-2.png'),
+          _buildMenuItem(1, 'assets/icons/calendar-1.png', 'assets/icons/calendar-2.png'),
           _buildMenuItem(2, 'assets/icons/chat-1.png', 'assets/icons/chat-2.png'),
-          _buildMenuItem(3, 'assets/icons/more-1.png', 'assets/icons/more-2.png'),
+          _buildMenuItem(3, 'assets/icons/profile-1.png', 'assets/icons/profile-2.png'),
         ],
       ),
     );

@@ -1,14 +1,27 @@
 from django.db import models
 
-class Doctor(models.Model):
-    name = models.CharField(max_length=255)
-    rating = models.FloatField()
-    specialty = models.CharField(max_length=255)
-    description = models.TextField()
-    picture = models.ImageField(upload_to='doctor_pictures/', blank=True, null=True)
+class Speciality(models.Model):
+    name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
+
+class VetDoctor(models.Model):
+    name = models.CharField(max_length=255)
+    rating = models.FloatField()
+    specialties = models.ManyToManyField(Speciality)
+    description = models.TextField()
+    picture = models.ImageField(upload_to='vet_doctor_pictures/', blank=True, null=True)
+    clinic_name = models.CharField(max_length=255)
+    clinic_address = models.CharField(max_length=255)
+    contact_number = models.CharField(max_length=20)
+    email = models.EmailField(blank=True, null=True)
+    availability = models.CharField(max_length=255, blank=True, null=True)  # Example: "Mon-Fri, 9AM-5PM"
+    consultation_fee = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)
+    experience_years = models.IntegerField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.name} - {', '.join([speciality.name for speciality in self.specialties.all()])}"
 
 class ConsultationPackage(models.Model):
     DURATION_CHOICES = [
@@ -24,7 +37,7 @@ class ConsultationPackage(models.Model):
         ('video', 'Video Call'),
     ]
 
-    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='packages')
+    doctor = models.ForeignKey(VetDoctor, on_delete=models.CASCADE, related_name='packages')
     duration = models.IntegerField(choices=DURATION_CHOICES)
     mode = models.CharField(max_length=5, choices=MODE_CHOICES)
 

@@ -17,11 +17,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: SplashScreen(),
-      routes: {
-        '/home': (context) => Home(),
-        '/more': (context) => MorePage(),
-        // Add other routes here if necessary
-      },
+      debugShowCheckedModeBanner: false,
     );
   }
 }

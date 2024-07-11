@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/core/home.dart';
 import 'package:frontend/services/token_storage.dart';
 import 'package:frontend/screens/auth/sign_in.dart';
 import 'package:frontend/screens/auth/sign_up.dart';
 
-class MorePage extends StatefulWidget {
-  const MorePage({Key? key}) : super(key: key);
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({Key? key}) : super(key: key);
 
   @override
-  _MorePageState createState() => _MorePageState();
+  _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _MorePageState extends State<MorePage> {
+class _ProfilePageState extends State<ProfilePage> {
   bool _isGuest = true;
   Map<String, String>? _userData;
 
@@ -37,7 +38,7 @@ class _MorePageState extends State<MorePage> {
     await tokenStorage.deleteUserData();
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => SignIn()),
+      MaterialPageRoute(builder: (context) => HomeScreen()),
     );
   }
 
@@ -45,7 +46,7 @@ class _MorePageState extends State<MorePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('More'),
+        title: Text('Profile'),
       ),
       body: Center(
         child: _isGuest
@@ -77,12 +78,27 @@ class _MorePageState extends State<MorePage> {
                 children: [
                   if (_userData != null)
                     ...[
-                      Text('Name: ${_userData?['name']}'),
-                      Text('Email: ${_userData?['email']}'),
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundImage: AssetImage('assets/images/profile_placeholder.png'), // Ganti dengan path gambar profil Anda
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        'Username: ${_userData?['username']}',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        'Email: ${_userData?['email']}',
+                        style: TextStyle(fontSize: 18),
+                      ),
                     ],
+                  SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () => _signOut(context),
                     child: Text('Sign Out'),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white, backgroundColor: Colors.red,
+                    ),
                   ),
                 ],
               ),
