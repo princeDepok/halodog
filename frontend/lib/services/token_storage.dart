@@ -1,4 +1,3 @@
-// token_storage.dart
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class TokenStorage {
@@ -55,5 +54,9 @@ class TokenStorage {
   Future<bool> isGuest() async {
     final userId = await getUserId();
     return userId == null;
+  }
+
+  Future<String?> getUserEmail() async {
+    return await _secureStorage.read(key: 'email'); // Assuming email is stored with key 'email'
   }
 }

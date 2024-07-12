@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:frontend/screens/core/doctors/list_vet.dart';
 import 'package:frontend/screens/core/doctors/vet_details.dart';
 import 'package:frontend/services/api_services.dart';
@@ -58,12 +61,17 @@ class _HomeScreenState extends State<HomeScreen> {
   final ApiService _apiService = ApiService();
   bool isGuest = true;
   List<dynamic> vetDoctors = [];
+  List<dynamic> userBookings = [];
+  List<dynamic> onProgressBookings = [];
 
   @override
   void initState() {
     super.initState();
-    _checkUserStatus();
-    _fetchVetDoctors();
+    initializeDateFormatting('id_ID', null).then((_) {
+      _checkUserStatus();
+      _fetchVetDoctors();
+      _fetchUserBookings();
+    });
   }
 
   Future<void> _checkUserStatus() async {
@@ -106,6 +114,29 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       print('Error fetching vet doctors: $e');
     }
+  }
+
+  Future<void> _fetchUserBookings() async {
+    try {
+      final accessToken = await _tokenStorage.getAccessToken();
+      if (accessToken != null) {
+        final bookings = await _apiService.getUserBookings(accessToken);
+        setState(() {
+          userBookings = bookings;
+          onProgressBookings = bookings.where((booking) {
+            final status = booking['status'] as String;
+            return status == 'on_progress';
+          }).toList();
+        });
+      }
+    } catch (e) {
+      print('Error fetching user bookings: $e');
+    }
+  }
+
+  Future<void> _refreshData() async {
+    await _fetchVetDoctors();
+    await _fetchUserBookings();
   }
 
   void navigateToPage(BuildContext context, Widget page) {
@@ -153,143 +184,242 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  String _formatBookingDate(String dateStr) {
+    final DateTime date = DateTime.parse(dateStr);
+    final DateFormat formatter = DateFormat('EEEE, d MMMM yyyy', 'id_ID');
+    return formatter.format(date);
+  }
+
+  Future<void> _openWhatsApp(String phoneNumber) async {
+    final url = Uri.parse('https://wa.me/$phoneNumber');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  Widget _buildAppointmentItem(dynamic booking) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Color(0xFFF4A261),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                height: 50,
+                width: 50,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.person, color: Color(0xFFF4A261)),
+              ),
+              SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    booking['vet'],
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              Spacer(),
+              GestureDetector(
+                onTap: () => _openWhatsApp('082244274193'),
+                child: Icon(
+                  Icons.cookie,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+          Row(
+            children: [
+              Icon(
+                Icons.calendar_today,
+                color: Colors.white,
+              ),
+              SizedBox(width: 8),
+              Text(
+                _formatBookingDate(booking['booking_date']),
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(width: 16),
+              Icon(
+                Icons.access_time,
+                color: Colors.white,
+              ),
+              SizedBox(width: 8),
+              Text(
+                '${booking['duration']} Wib',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'Hello, $username 👋',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: 383,
-                  height: 61,
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search by doctor name/code',
-                      hintStyle: const TextStyle(
-                        color: Color(0xFF77838F),
-                      ),
-                      prefixIcon: const Icon(
-                        Icons.search,
-                        color: Color(0xFF77838F),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: Color(0xFFE2DFDF),
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: Color(0xFFE2DFDF),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: Color(0xFFE2DFDF),
-                        ),
-                      ),
-                      filled: true,
-                      fillColor: const Color(0xFFF3F3F3),
-                    ),
+        child: RefreshIndicator(
+          onRefresh: _refreshData,
+          child: SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    'Hello, $username 👋',
                     style: const TextStyle(
-                      color: Color(0xFF77838F),
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
                     ),
                   ),
-                ),
-                const SizedBox(height: 15),
-                Text(
-                  'Your next appointment',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                Text(
-                  "You don't have any appointment",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 15),
-                Text(
-                  'Consultation For',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                GridView.count(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 16.0,
-                  mainAxisSpacing: 16.0,
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  children: [
-                    _buildConsultationItem(
-                        context, 'Dog', Icons.pets, Color(0xffF4A261)),
-                    _buildConsultationItem(
-                        context, 'Cat', Icons.pets, Color(0xffF4A261)),
-                    _buildConsultationItem(
-                        context, 'Bird', Icons.pets, Color(0xffF4A261)),
-                    _buildConsultationItem(
-                        context, 'Hamster', Icons.pets, Color(0xffF4A261)),
-                    _buildConsultationItem(
-                        context, 'Rabbit', Icons.pets, Color(0xffF4A261)),
-                    _buildConsultationItem(
-                        context, 'All', Icons.more_horiz, Color(0xffF4A261)),
-                  ],
-                ),
-                const SizedBox(height: 35),
-                Text(
-                  "Veterinary",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: vetDoctors.length,
-                  itemBuilder: (context, index) {
-                    final doctor = vetDoctors[index];
-                    return GestureDetector(
-                      onTap: () => navigateToDoctorDetails(context, doctor),
-                      child: Column(
-                        children: [
-                          VetDoctorItem(doctor: doctor),
-                          SizedBox(height: 10), // Add spacing between items
-                        ],
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: 383,
+                    height: 61,
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Search by doctor name/code',
+                        hintStyle: const TextStyle(
+                          color: Color(0xFF77838F),
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.search,
+                          color: Color(0xFF77838F),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Color(0xFFE2DFDF),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Color(0xFFE2DFDF),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Color(0xFFE2DFDF),
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: const Color(0xFFF3F3F3),
                       ),
-                    );
-                  },
-                ),
-              ],
+                      style: const TextStyle(
+                        color: Color(0xFF77838F),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Text(
+                    'Your next appointment',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  onProgressBookings.isEmpty
+                      ? Text(
+                          "You don't have any appointment",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black87,
+                          ),
+                        )
+                      : _buildAppointmentItem(onProgressBookings.first),
+                  const SizedBox(height: 15),
+                  Text(
+                    'Consultation For',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  GridView.count(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 16.0,
+                    mainAxisSpacing: 16.0,
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    children: [
+                      _buildConsultationItem(
+                          context, 'Dog', Icons.pets, Color(0xffF4A261)),
+                      _buildConsultationItem(
+                          context, 'Cat', Icons.pets, Color(0xffF4A261)),
+                      _buildConsultationItem(
+                          context, 'Bird', Icons.pets, Color(0xffF4A261)),
+                      _buildConsultationItem(
+                          context, 'Hamster', Icons.pets, Color(0xffF4A261)),
+                      _buildConsultationItem(
+                          context, 'Rabbit', Icons.pets, Color(0xffF4A261)),
+                      _buildConsultationItem(
+                          context, 'All', Icons.more_horiz, Color(0xffF4A261)),
+                    ],
+                  ),
+                  const SizedBox(height: 35),
+                  Text(
+                    "Veterinary",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: vetDoctors.length,
+                    itemBuilder: (context, index) {
+                      final doctor = vetDoctors[index];
+                      return GestureDetector(
+                        onTap: () => navigateToDoctorDetails(context, doctor),
+                        child: Column(
+                          children: [
+                            VetDoctorItem(doctor: doctor),
+                            SizedBox(height: 10), // Add spacing between items
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -1,5 +1,3 @@
-// vet_details.dart
-
 import 'package:flutter/material.dart';
 import 'package:frontend/screens/core/consult/summary.dart';
 
@@ -82,19 +80,25 @@ class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateM
 
   void _navigateToSummary() {
     int totalPrice = 0;
+    int duration = 0;
+
     if (_selectedPackage == 'Chat') {
       totalPrice = _totalChatPrice;
+      duration = _selectedChatTime == '15 minutes' ? 15 : _selectedChatTime == '30 minutes' ? 30 : 60;
     } else if (_selectedPackage == 'Video Call') {
       totalPrice = _totalCallPrice;
+      duration = _selectedCallTime == '30 minutes' ? 30 : _selectedCallTime == '45 minutes' ? 45 : 60;
     } else if (_selectedPackage == 'Clinic Appointment') {
       totalPrice = int.parse(widget.doctor['appointment_fee']);
+      duration = 60; // Assuming clinic appointment has a fixed duration
     }
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ReviewSummaryPage(
           selectedDoctor: widget.doctor,
-          selectedDuration: _selectedPackage == 'Chat' ? _selectedChatTime ?? '' : _selectedCallTime ?? '',
+          selectedDuration: duration.toString(),
           selectedPackage: _selectedPackage ?? '',
           totalPrice: totalPrice,
         ),
@@ -110,14 +114,14 @@ class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateM
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.more_vert, color: Colors.black),
+            icon: const Icon(Icons.more_vert, color: Colors.black),
             onPressed: () {},
           ),
         ],
@@ -127,9 +131,9 @@ class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateM
           unselectedLabelColor: Colors.grey,
           indicatorColor: Colors.black,
           tabs: [
-            Tab(text: 'Chat'),
-            Tab(text: 'Video Call'),
-            Tab(text: 'Clinic Appointment'),
+            const Tab(text: 'Chat'),
+            const Tab(text: 'Video Call'),
+            const Tab(text: 'Clinic Appointment'),
           ],
         ),
       ),
@@ -153,27 +157,27 @@ class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateM
                         radius: 50,
                         backgroundImage: NetworkImage(widget.doctor['picture']), // Doctor's image
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       Text(
                         widget.doctor['name'],
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
                       ),
-                      SizedBox(height: 5),
+                      const SizedBox(height: 5),
                       Text(
                         widget.doctor['clinic_name'],
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                           color: Colors.black54,
                         ),
                       ),
-                      SizedBox(height: 5),
+                      const SizedBox(height: 5),
                       Text(
                         widget.doctor['clinic_address'],
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 14,
                           color: Colors.black54,
                         ),
@@ -187,7 +191,7 @@ class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateM
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
                 ),
@@ -196,7 +200,7 @@ class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateM
                     color: Colors.grey.withOpacity(0.2),
                     spreadRadius: 2,
                     blurRadius: 5,
-                    offset: Offset(0, -2), // changes position of shadow
+                    offset: const Offset(0, -2), // changes position of shadow
                   ),
                 ],
               ),
@@ -207,52 +211,52 @@ class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateM
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.star, color: Colors.amber, size: 20),
-                        SizedBox(width: 4),
+                        const Icon(Icons.star, color: Colors.amber, size: 20),
+                        const SizedBox(width: 4),
                         Text(
                           '${widget.doctor['rating']}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 20),
-                    Text(
+                    const SizedBox(height: 20),
+                    const Text(
                       'Description',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Text(
                       widget.doctor['description'],
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
                         color: Colors.grey,
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Text(
                       'Experience: ${widget.doctor['experience_years']} years',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16,
                         color: Colors.black54,
                       ),
                     ),
-                    SizedBox(height: 20),
-                    Text(
-                      'Specialities',
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Specialties',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 10),
-                    _buildSpecialities(widget.doctor['specialties']),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 10),
+                    _buildSpecialties(widget.doctor['specialties']),
+                    const SizedBox(height: 20),
                     Container(
                       height: 300, // Adjusted height to accommodate fee information
                       child: TabBarView(
@@ -264,7 +268,7 @@ class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateM
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     _buildSelectPackageButton(context),
                   ],
                 ),
@@ -276,20 +280,35 @@ class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildSpecialities(dynamic specialties) {
-    if (specialties is List && specialties.isNotEmpty && specialties[0] is Map) {
+  Widget _buildSpecialties(dynamic specialties) {
+    // Adding debugging statements
+    print('Specialties: $specialties');
+    if (specialties != null && specialties is List && specialties.isNotEmpty) {
+      // Adding type checks and debugging
+      for (var specialty in specialties) {
+        print('Specialty type: ${specialty.runtimeType}');
+        if (specialty is! Map) {
+          print('Invalid specialty format: $specialty');
+        }
+      }
       return Wrap(
         spacing: 10,
         runSpacing: 10,
         children: specialties.map<Widget>((specialty) {
-          return Chip(
-            label: Text(specialty['name']),
-          );
+          if (specialty is Map && specialty.containsKey('name')) {
+            return Chip(
+              label: Text(specialty['name']),
+            );
+          } else {
+            return const Chip(
+              label: Text('Invalid specialty'),
+            );
+          }
         }).toList(),
       );
     } else {
-      return Text(
-        'No specialities available',
+      return const Text(
+        'No specialties available',
         style: TextStyle(
           color: Colors.grey,
           fontSize: 14,
@@ -305,13 +324,13 @@ class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateM
           child: ElevatedButton(
             onPressed: _navigateToSummary,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFF7B61FF),
-              padding: EdgeInsets.symmetric(vertical: 15),
+              backgroundColor: const Color(0xffF4A261),
+              padding: const EdgeInsets.symmetric(vertical: 15),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: Text(
+            child: const Text(
               'Confirm Package',
               style: TextStyle(
                 fontSize: 16,
@@ -329,14 +348,14 @@ class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateM
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Select Time Package',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         DropdownButton<String>(
           value: _selectedChatTime,
           items: ['15 minutes', '30 minutes', '60 minutes']
@@ -352,20 +371,20 @@ class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateM
               _updateChatPrice();
             });
           },
-          hint: Text('Select Time'),
+          hint: const Text('Select Time'),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Text(
           'Consultation Fee: Rp${widget.doctor['chat_consultation_fee']}',
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16,
             color: Colors.black54,
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Text(
           'Total Price: Rp$_totalChatPrice',
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16,
             color: Colors.black87,
             fontWeight: FontWeight.bold,
@@ -379,14 +398,14 @@ class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateM
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Select Time Package',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         DropdownButton<String>(
           value: _selectedCallTime,
           items: ['30 minutes', '45 minutes', '60 minutes']
@@ -402,20 +421,20 @@ class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateM
               _updateCallPrice();
             });
           },
-          hint: Text('Select Time'),
+          hint: const Text('Select Time'),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Text(
           'Consultation Fee: Rp${widget.doctor['voice_call_consultation_fee']}',
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16,
             color: Colors.black54,
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Text(
           'Total Price: Rp$_totalCallPrice',
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16,
             color: Colors.black87,
             fontWeight: FontWeight.bold,
@@ -429,14 +448,14 @@ class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateM
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Select Date',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -447,15 +466,15 @@ class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateM
             _buildDateItem('23', 'Wed', false),
           ],
         ),
-        SizedBox(height: 20),
-        Text(
+        const SizedBox(height: 20),
+        const Text(
           'Select Time',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Wrap(
           spacing: 10,
           runSpacing: 10,
@@ -466,10 +485,10 @@ class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateM
             _buildTimeItem('11:00 AM'),
           ],
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Text(
           'Consultation Fee: Rp${widget.doctor['appointment_fee']}',
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16,
             color: Colors.black54,
           ),
@@ -480,9 +499,9 @@ class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateM
 
   Widget _buildDateItem(String date, String day, bool isSelected) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       decoration: BoxDecoration(
-        color: isSelected ? Color(0xFF7B61FF) : Colors.grey[200],
+        color: isSelected ? const Color(0xFF7B61FF) : Colors.grey[200],
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
@@ -509,28 +528,28 @@ class _VetDetailsState extends State<VetDetails> with SingleTickerProviderStateM
 
   Widget _buildTimeItem(String time) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
         time,
-        style: TextStyle(color: Colors.black),
+        style: const TextStyle(color: Colors.black),
       ),
     );
   }
 
   Widget _buildTimePackageItem(String package) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
         package,
-        style: TextStyle(color: Colors.black),
+        style: const TextStyle(color: Colors.black),
       ),
     );
   }

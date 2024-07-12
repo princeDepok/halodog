@@ -1,6 +1,5 @@
-// summary.dart
-
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/list_animals.dart';
 import 'package:intl/intl.dart';
 import 'package:frontend/services/token_storage.dart';
 import 'package:frontend/screens/auth/sign_in.dart';
@@ -26,9 +25,9 @@ class ReviewSummaryPage extends StatelessWidget {
     String formattedTime = DateFormat('hh:mm a').format(now);
 
     return Scaffold(
-      backgroundColor: Colors.orange[50],
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.orange[50],
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -71,11 +70,6 @@ class ReviewSummaryPage extends StatelessWidget {
                     selectedDoctor['name'],
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
-                  // Uncomment this if specialty is available and needed
-                  // Text(
-                  //   selectedDoctor['specialty'],
-                  //   style: TextStyle(color: Colors.grey),
-                  // ),
                 ],
               ),
             ),
@@ -106,48 +100,6 @@ class ReviewSummaryPage extends StatelessWidget {
               ),
             ),
             SizedBox(height: 20),
-            Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    spreadRadius: 1,
-                    blurRadius: 5,
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.credit_card, color: Colors.blue),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Bank Central Asia',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          '**** **** **** 1121',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      // Change payment method action
-                    },
-                    child: Text('Change'),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
                 TokenStorage tokenStorage = TokenStorage();
@@ -158,17 +110,25 @@ class ReviewSummaryPage extends StatelessWidget {
                     MaterialPageRoute(builder: (context) => SignIn()),
                   );
                 } else {
-                  // Proceed with booking action
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ListAnimals(
+                      selectedDoctor: selectedDoctor,
+                      selectedDuration: selectedDuration,
+                      selectedPackage: selectedPackage,
+                      totalPrice: totalPrice,
+                    )),
+                  );
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+                backgroundColor: Color(0xffF4A261),
                 padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: Text('Book', style: TextStyle(fontSize: 18)),
+              child: Text('Select Animal', style: TextStyle(fontSize: 18, color: Colors.white)),
             ),
           ],
         ),

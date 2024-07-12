@@ -127,7 +127,7 @@ class RefreshTokenView(APIView):
 class PetListView(generics.ListCreateAPIView):
     queryset = Pet.objects.all()
     serializer_class = PetSerializer
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

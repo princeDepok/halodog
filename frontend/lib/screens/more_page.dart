@@ -32,15 +32,16 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-  void _signOut(BuildContext context) async {
-    final TokenStorage tokenStorage = TokenStorage();
-    await tokenStorage.deleteTokens();
-    await tokenStorage.deleteUserData();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => Home()),
-    );
-  }
+void _signOut(BuildContext context) async {
+  final TokenStorage tokenStorage = TokenStorage();
+  await tokenStorage.deleteTokens();
+  await tokenStorage.deleteUserData();
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => SignIn()),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {

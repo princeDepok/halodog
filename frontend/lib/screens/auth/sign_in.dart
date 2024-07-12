@@ -18,40 +18,47 @@ class _SignInState extends State<SignIn> {
   final TextEditingController _passwordController = TextEditingController();
 
   Future<void> _signIn() async {
-    final apiService = ApiService();
-    final email = _emailController.text;
-    final password = _passwordController.text;
+  final apiService = ApiService();
+  final email = _emailController.text;
+  final password = _passwordController.text;
 
-    if (email.isNotEmpty && password.isNotEmpty) {
-      final loginData = {
-        'username': email,
-        'password': password,
-      };
+  if (email.isNotEmpty && password.isNotEmpty) {
+    final loginData = {
+      'username': email,
+      'password': password,
+    };
 
-      final loginResponse = await apiService.loginUser(loginData);
-      if (loginResponse.statusCode == 200) {
-        final tokens = loginResponse.data;
-        final tokenStorage = TokenStorage();
-        await tokenStorage.saveTokens(tokens['access'], tokens['refresh']);
+    final loginResponse = await apiService.loginUser(loginData);
+    if (loginResponse.statusCode == 200) {
+      final tokenStorage = TokenStorage();
+      
+      // Hapus data pengguna sebelumnya
+      await tokenStorage.deleteTokens();
+      await tokenStorage.deleteUserData();
+      
+      // Simpan token baru
+      final tokens = loginResponse.data;
+      await tokenStorage.saveTokens(tokens['access'], tokens['refresh']);
 
-        // Fetch user details and store user data
-        final userId = tokens['user_id'].toString();
-        await tokenStorage.saveUserId(userId);
-        final userDetailsResponse = await apiService.getUserDetails(int.parse(userId), tokens['access']);
-        if (userDetailsResponse.statusCode == 200) {
-          await tokenStorage.saveUserData(userDetailsResponse.data);
-          _navigateToHome();
-          print('Login and user data fetch successful');
-        } else {
-          print('Failed to fetch user details: ${userDetailsResponse.data}');
-        }
+      // Simpan data pengguna baru
+      final userId = tokens['user_id'].toString();
+      await tokenStorage.saveUserId(userId);
+      final userDetailsResponse = await apiService.getUserDetails(int.parse(userId), tokens['access']);
+      if (userDetailsResponse.statusCode == 200) {
+        await tokenStorage.saveUserData(userDetailsResponse.data);
+        _navigateToHome();
+        print('Login and user data fetch successful');
       } else {
-        print('Login failed: ${loginResponse.data}');
+        print('Failed to fetch user details: ${userDetailsResponse.data}');
       }
     } else {
-      print('Please fill in both fields');
+      print('Login failed: ${loginResponse.data}');
     }
+  } else {
+    print('Please fill in both fields');
   }
+}
+
 
   void _navigateToSignUp() {
     Navigator.push(
@@ -70,6 +77,7 @@ class _SignInState extends State<SignIn> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(

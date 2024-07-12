@@ -35,9 +35,9 @@ class ConsultationPackage(models.Model):
     ]
 
     MODE_CHOICES = [
-        ('msg', 'Messaging'),
-        ('voice', 'Voice Call'),
-        ('video', 'Video Call'),
+        ('msg', 'Chat'),
+        ('voice', 'Video Call'),
+        ('video', 'Clinic Appointment'),
     ]
 
     doctor = models.ForeignKey(VetDoctor, on_delete=models.CASCADE, related_name='packages')
